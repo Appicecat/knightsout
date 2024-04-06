@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knight's Light Puzzle</title>
+<style>
+  .cell {
+    width: 50px;
+    height: 50px;
+    border: 2px solid black;
+    display: inline-block;
+    margin: 5px; /* 添加空间 */
+    padding: 0;
+    background-color: white;
+    border-radius: 50%; /* 将方块变成圆形 */
+  }
+  #instructions {
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<h1>騎士點燈</h1>
+<label for="rows">Rows:</label>
+<input type="number" id="rows" name="rows" min="1" max="10" value="5">
+<label for="cols">Columns:</label>
+<input type="number" id="cols" name="cols" min="1" max="10" value="5">
+<button onclick="createBoard()">Create Board</button>
+<button onclick="resetBoard()">Reset Board</button>
+<div id="board"></div>
+<div id="instructions">
+  <h2>提示:</h2>
+  <!-- 在这里添加游戏的说明信息 -->
+  <p>按下Create Board建立一個燈組，左邊可以輸入長(rows)、寬(cols)去製造燈組，按下Reset Board可以重置燈組</p>
+</div>
+<div id="instructions">
+  <h2>遊戲說明:</h2>
+  <!-- 在这里添加游戏的说明信息 -->
+  <p>當按下某一個燈泡後，不止此燈泡本身會改變狀態(從亮變暗，
+    或是從暗變亮)，而且其所有騎士走法(指位於「先橫移一格再豎移兩格」或「先豎移一格再橫移兩格」的燈泡也會改變狀態)，目的是讓燈全亮，請由上方輸入長度和寬度，旁邊的重置鍵可以重置，當切換燈組長度和寬度時亦會重置</p>
+</div>
+<script>
+  let board = [];
+
+  function createBoard() {
+    const rows = parseInt(document.getElementById('rows').value);
+    const cols = parseInt(document.getElementById('cols').value);
+
+    const boardDiv = document.getElementById('board');
+    boardDiv.innerHTML = '';
+
+    board = [];
+    for (let i = 0; i < rows; i++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      for (let j = 0; j < cols; j++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.addEventListener('click', () => pressLight(i, j));
+        rowDiv.appendChild(cell);
+        board.push(0);
+      }
+      boardDiv.appendChild(rowDiv);
+    }
+  }
+
+  function resetBoard() {
+    const rows = parseInt(document.getElementById('rows').value);
+    const cols = parseInt(document.getElementById('cols').value);
+    createBoard();
+    updateBoard();
+  }
+
+  function pressLight(row, col) {
+    const cols = parseInt(document.getElementById('cols').value);
+    const index = row * cols + col;
+    board[index] = 1 - board[index];  // 切换灯光状态
+
+    // 骑士走法的八个方向
+    const moves = [
+      [-2, -1], [-2, 1],
+      [-1, -2], [-1, 2],
+      [1, -2], [1, 2],
+      [2, -1], [2, 1]
+    ];
+
+    for (const move of moves) {
+      const newRow = row + move[0];
+      const newCol = col + move[1];
+      if (newRow >= 0 && newRow < parseInt(document.getElementById('rows').value) && newCol >= 0 && newCol < parseInt(document.getElementById('cols').value)) {
+        const newIndex = newRow * cols + newCol;
+        board[newIndex] = 1 - board[newIndex];
+      }
+    }
+
+    updateBoard();
+  }
+
+  function updateBoard() {
+    const cells = document.getElementsByClassName('cell');
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      const row = parseInt(cell.dataset.row);
+      const col = parseInt(cell.dataset.col);
+      const index = row * parseInt(document.getElementById('cols').value) + col;
+      cell.style.backgroundColor = board[index] === 0 ? 'white' : 'yellow';
+    }
+  }
+</script>
+</body>
+</html>
